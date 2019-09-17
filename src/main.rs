@@ -1,9 +1,7 @@
 #![no_std]
 #![no_main]
 
-extern crate cortex_m_rt;
 extern crate panic_halt;
-extern crate stm32f0;
 
 use cortex_m::peripheral::Peripherals;
 use cortex_m_rt::entry;
