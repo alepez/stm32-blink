@@ -5,29 +5,34 @@ extern crate cortex_m_rt;
 extern crate panic_halt;
 extern crate stm32f0;
 
+use cortex_m::peripheral::Peripherals;
 use cortex_m_rt::entry;
-use stm32f0::stm32f0x2;
+use stm32f0xx_hal::delay::Delay;
+use stm32f0xx_hal::prelude::*;
+use stm32f0xx_hal::stm32;
 
 // use `main` as the entry point of this application
 #[entry]
 fn main() -> ! {
-    // get handles to the hardware
-    let peripherals = stm32f0x2::Peripherals::take().unwrap();
-    let gpioc = &peripherals.GPIOC;
-    let rcc = &peripherals.RCC;
+    let mut peripherals = stm32::Peripherals::take().unwrap();
+    let cp = Peripherals::take().unwrap();
 
-    // enable the GPIO clock for IO port C
-    //rcc.apb2enr.write(|w| w.iopcen().set_bit());
+    cortex_m::interrupt::free(|cs| {
+        let mut rcc = peripherals
+            .RCC
+            .configure()
+            .sysclk(8.mhz())
+            .freeze(&mut peripherals.FLASH);
 
-    //    gpioc.crh.write(|w| unsafe {
-    //        w.mode13().bits(0b11);
-    //        w.cnf13().bits(0b00)
-    //    });
+        let gpioc = peripherals.GPIOC.split(&mut rcc);
 
-    loop {
-        gpioc.bsrr.write(|w| w.bs13().set_bit());
-        cortex_m::asm::delay(2000000);
-        gpioc.brr.write(|w| w.br13().set_bit());
-        cortex_m::asm::delay(2000000);
-    }
+        let mut delay = Delay::new(cp.SYST, &rcc);
+
+        let mut orange = gpioc.pc8.into_push_pull_output(cs);
+
+        loop {
+            orange.toggle();
+            delay.delay_ms(50_u16);
+        }
+    })
 }
