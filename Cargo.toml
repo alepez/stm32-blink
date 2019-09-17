@@ -3,3 +3,28 @@ name = "stm32-blink"
 version = "0.1.0"
 authors = ["Alessandro Pezzato <alessandro.pezzato@gmail.com>"]
 edition = "2018"
+
+[dependencies]
+stm32f0 = {version = "0.8.0", features = ["stm32f0x2", "rt"]}
+cortex-m-rt = "0.6.10"
+cortex-m = "0.6.1"
+panic-halt = "0.2.0"
+bare-metal = "0.2.5"
+
+[dev-dependencies]
+nb = "0.1.2"
+panic-halt = "0.2.0"
+panic-ramdump = "0.1.1"
+
+[features]
+default = ["rt"]
+rt = []
+
+[profile]
+[profile.dev]
+debug = true
+
+[profile.release]
+debug = true
+lto = true
+opt-level = "s"
